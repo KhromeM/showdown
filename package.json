@@ -1,0 +1,16 @@
+{
+  "name": "showdown-bot",
+  "version": "1.0.0",
+  "description": "A Pokemon Showdown bot that can play random battles",
+  "main": "script.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node script.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "ws": "^8.18.0"
+  }
+}
