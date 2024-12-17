@@ -1,7 +1,8 @@
 import readline from "readline";
 
 export default class BattleInputHandler {
-	constructor() {
+	constructor(bot) {
+		this.bot;
 		this.rl = readline.createInterface({
 			input: process.stdin,
 			output: process.stdout,
@@ -23,7 +24,7 @@ export default class BattleInputHandler {
 			return;
 		}
 
-		console.log("\nYour turn! Choose your action:");
+		this.bot.decisionMaker.battleLog("\nYour turn! Choose your action:");
 
 		// Show Tera option if available
 		const activePokemon = gameState.myTeam?.pokemon[gameState.myTeam.active];
@@ -33,22 +34,24 @@ export default class BattleInputHandler {
 			gameState.myActive &&
 			!gameState.myActive.volatileStatus.includes("terastallized");
 
-		console.log("\nMoves:");
+		this.bot.decisionMaker.battleLog("\nMoves:");
 		gameState.myActive.moves?.forEach((move, index) => {
 			const disabled = move.disabled ? " (DISABLED)" : "";
-			console.log(`${index + 1}. ${move.move}${disabled}`);
+			this.bot.decisionMaker.battleLog(`${index + 1}. ${move.move}${disabled}`);
 		});
 
 		if (canTera) {
-			console.log("\nTerastallize + move:");
-			console.log("t1-t4. Terastallize and use move (e.g., t1 for move 1)");
+			this.bot.decisionMaker.battleLog("\nTerastallize + move:");
+			this.bot.decisionMaker.battleLog(
+				"t1-t4. Terastallize and use move (e.g., t1 for move 1)"
+			);
 		}
 
-		console.log("\nTeam:");
+		this.bot.decisionMaker.battleLog("\nTeam:");
 		if (gameState.myTeam?.pokemon) {
 			gameState.myTeam.pokemon.forEach((pokemon, index) => {
 				if (!pokemon.active && pokemon.hp?.current > 0) {
-					console.log(
+					this.bot.decisionMaker.battleLog(
 						`s${index + 1}. Switch to ${pokemon.details} (${
 							pokemon.baseAbility || "Unknown ability"
 						}, ${pokemon.item || "No item"})`
@@ -98,7 +101,7 @@ export default class BattleInputHandler {
 					return { type: "move", choice: moveIndex + 1 };
 				}
 			}
-			console.log("Invalid choice. Please try again.");
+			this.bot.decisionMaker.battleLog("Invalid choice. Please try again.");
 		}
 	}
 }

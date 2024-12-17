@@ -146,7 +146,7 @@ export function formatGameState(gameState) {
 		console.log("Game state not initialized");
 		return;
 	}
-	let output = formatTeamOverview(gameState.myTeam) || "";
+	let output = "";
 
 	output += `\n${DIVIDER}\n`;
 	output += `TURN ${gameState.turn || 0}\n`; // Default to 0 if turn is undefined

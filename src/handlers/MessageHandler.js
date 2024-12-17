@@ -1,6 +1,5 @@
 import BattleHandler from "./BattleHandler.js";
 import { formatTeamOverview, formatGameState } from "../utils/StateLogger.js";
-
 export default class MessageHandler {
 	constructor(bot) {
 		this.bot = bot;
@@ -17,7 +16,6 @@ export default class MessageHandler {
 				const roomId = line.slice(1).split("\n")[0];
 				if (roomId.startsWith("battle-")) {
 					this.bot.battleRoom = roomId;
-					console.log("Updated battle room to:", roomId);
 				}
 			}
 
@@ -74,7 +72,15 @@ export default class MessageHandler {
 
 				case "inactive":
 					if (parts[2]?.startsWith("Time left:")) {
-						this.bot.decisionMaker.addMessage();
+						if (this.bot.decisionMaker.battleLogs.length == 0) {
+							this.bot.decisionMaker.battleLog("Battle started:\n");
+							this.bot.decisionMaker.battleLog(
+								formatTeamOverview(this.bot.gameState.myTeam)
+							);
+						}
+						this.bot.decisionMaker.battleLog(
+							formatGameState(this.bot.gameState)
+						);
 						this.bot.makeMove();
 					}
 					break;

@@ -1,12 +1,13 @@
 import fs from "fs";
 import path from "path";
-import { formatGameState } from "./StateLogger.js";
+import OpenRouterAPI from "./OpenRouter.mjs";
 
 export default class BattleDecisionMaker {
 	constructor() {
-		this.states = []; // Will store the formatGameState output strings
+		this.battleLogs = [];
 		this.currentGameState = null;
 		this.uid = new Date().getTime();
+		this.openRouter = new OpenRouterAPI();
 
 		const logsDir = path.join(process.cwd(), "gameLogs");
 		if (!fs.existsSync(logsDir)) {
@@ -14,15 +15,14 @@ export default class BattleDecisionMaker {
 		}
 	}
 
-	addMessage() {
-		const formattedState = formatGameState(this.currentGameState);
-		if (!formattedState) return;
-		console.log("FORMATTED STATE: ", formattedState);
-		this.states.push(formattedState);
+	battleLog(...args) {
+		const logMessage = args.map((arg) => String(arg)).join(" ");
+		console.log(...args);
+		this.battleLogs.push(logMessage);
 
 		try {
 			const logPath = path.join(process.cwd(), "gameLogs", `${this.uid}.json`);
-			fs.writeFileSync(logPath, JSON.stringify(this.states, null, 2));
+			fs.writeFileSync(logPath, JSON.stringify(this.battleLogs, null, 2));
 		} catch (error) {
 			console.error("Error writing battle logs:", error);
 		}
@@ -32,38 +32,17 @@ export default class BattleDecisionMaker {
 		this.currentGameState = gameState;
 	}
 
-	makeDecision() {
+	async makeDecision() {
 		if (!this.currentGameState?.myActive?.moves) {
 			return null;
 		}
 
-		const validMoves = [];
-
-		// Add valid moves
-		this.currentGameState.myActive.moves.forEach((move, index) => {
-			if (!move.disabled) {
-				validMoves.push({ type: "move", choice: index + 1 });
-			}
-		});
-
-		// Add valid switches
-		if (this.currentGameState.myTeam?.pokemon) {
-			this.currentGameState.myTeam.pokemon.forEach((pokemon, index) => {
-				if (!pokemon.active && pokemon.hp?.current > 0) {
-					validMoves.push({ type: "switch", choice: index + 1 });
-				}
-			});
-		}
-
-		// Return random valid move
-		if (validMoves.length > 0) {
-			return validMoves[Math.floor(Math.random() * validMoves.length)];
-		}
-
-		return null;
+		const aiResponse = await this.openRouter.getBattleDecision(this.battleLogs);
+		this.battleLog(JSON.stringify(aiResponse));
+		return aiResponse.action;
 	}
 
 	getContext() {
-		return this.states;
+		return this.battleLogs;
 	}
 }
