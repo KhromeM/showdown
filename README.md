@@ -1,4 +1,5 @@
 # Pokemon Showdown Bot
+turns out llms are bad at pokemon. you can probably improve this by showing ability and item info and move side effect + damaage calcs.
 
 A simple bot that can play Pokemon Showdown random battles.
 
